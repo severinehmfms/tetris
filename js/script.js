@@ -41,7 +41,9 @@ document.addEventListener("keydown", function(event) {
     //Avant les pièces de plusieurs cases
     //largeurpiece = piece.taille; //CASE
     nblignespiece = piece.forme.length;
-    nbcolonnespiece = piece.forme[0].length;
+    
+    nbcolonnespiece = getNbColonnesForme(piece.forme);
+    //console.log("nb colonnes carré : " + getNbColonnesForme(CARRE));
     nbcolonnespiecepixels = nbcolonnespiece * CASE;
 
     if (event.key === "ArrowLeft") {
@@ -61,6 +63,19 @@ document.addEventListener("keydown", function(event) {
     }
     
 });
+
+//Fonction qui calcule le nombre de colonnes réel que prend une forme
+function getNbColonnesForme(forme){
+    let nbColonnes = 0;
+    for (let i = 0; i < 1 ; i++){
+        for (let j = 0; j < forme[i].length ; j++){
+            if (forme[i][j] == 1){
+                nbColonnes ++;
+            }            
+        }
+    }
+    return nbColonnes;
+}
 
 //Toutes les TIME ms, on appelle la fonction chute
 setInterval(function () {
