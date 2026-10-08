@@ -40,10 +40,10 @@ let piece = {
 document.addEventListener("keydown", function(event) {
     //Avant les pièces de plusieurs cases
     //largeurpiece = piece.taille; //CASE
-    nblignespiece = piece.forme.length;
+    nblignespiece = getNbLignesForme;
+    nblignespiecepixels = nblignespiece * CASE;
     
     nbcolonnespiece = getNbColonnesForme(piece.forme);
-    //console.log("nb colonnes carré : " + getNbColonnesForme(CARRE));
     nbcolonnespiecepixels = nbcolonnespiece * CASE;
 
     if (event.key === "ArrowLeft") {
@@ -62,6 +62,21 @@ document.addEventListener("keydown", function(event) {
     
 });
 
+
+//Toutes les TIME ms, on appelle la fonction chute
+setInterval(function () {
+
+    //Si la partie n'est pas finie
+    if (!gameOver) {
+        hauteurpiece = getNbLignesForme(piece.forme);
+        //piece.y = piece.y < HAUTEUR - CASE ? piece.y + CASE : HAUTEUR - CASE;
+        piece.y = piece.y < HAUTEUR - hauteurpiece ? piece.y + CASE : HAUTEUR - hauteurpiece;
+
+        draw(piece);
+    }
+
+}, TIME);
+
 //Fonction qui calcule le nombre de colonnes réel que prend une forme
 function getNbColonnesForme(forme){
     let idmaxavecun = 0;
@@ -75,16 +90,18 @@ function getNbColonnesForme(forme){
     return idmaxavecun+1;
 }
 
-//Toutes les TIME ms, on appelle la fonction chute
-setInterval(function () {
-
-    //Si la partie n'est pas finie
-    if (!gameOver) {
-        piece.y = piece.y < HAUTEUR - CASE ? piece.y + CASE : HAUTEUR - CASE;
-        draw(piece);
+//Fonction qui calcule le nombre de lignes réel que prend une forme
+function getNbLignesForme(forme){
+    let idmaxavecun = 0;
+    for (let i = 0; i < forme.length ; i++){
+        for (let j = 0; j < forme[i].length ; j++){
+            if (forme[i][j] == 1){
+                if (i > idmaxavecun) idmaxavecun = i;
+            }            
+        }
     }
-
-}, TIME);
+    return idmaxavecun+1;
+}
 
 //Fonction qui dessine la grille du tetris
 function showGrid(){
