@@ -55,8 +55,6 @@ document.addEventListener("keydown", function(event) {
 
     if (event.key === "ArrowRight") {
         //piece.x = piece.x + CASE > LARGEUR - CASE ? LARGEUR - CASE : piece.x + CASE;
-
-        //il y a une erreur car la largeur du carré en fait c'est pas 3 mais 2 !!!!
         piece.x = piece.x + CASE < LARGEUR - nbcolonnespiecepixels ? piece.x + CASE : LARGEUR - nbcolonnespiecepixels;
 
         draw(piece);
@@ -66,15 +64,15 @@ document.addEventListener("keydown", function(event) {
 
 //Fonction qui calcule le nombre de colonnes réel que prend une forme
 function getNbColonnesForme(forme){
-    let nbColonnes = 0;
-    for (let i = 0; i < 1 ; i++){
+    let idmaxavecun = 0;
+    for (let i = 0; i < forme.length ; i++){
         for (let j = 0; j < forme[i].length ; j++){
             if (forme[i][j] == 1){
-                nbColonnes ++;
+                if (j > idmaxavecun) idmaxavecun = j;
             }            
         }
     }
-    return nbColonnes;
+    return idmaxavecun+1;
 }
 
 //Toutes les TIME ms, on appelle la fonction chute
