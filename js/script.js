@@ -8,6 +8,21 @@ const LARGEUR = 300;
 const HAUTEUR = 600;
 const TIME = 400;
 
+const CARRE =  [
+        [1,1,0],
+        [1,1,0]
+    ];
+
+const L = [
+    [1,0,0],
+    [1,1,1]
+];
+
+const TRAIT = [
+    [1,1,1],
+    [0,0,0]
+];
+
 let gameOver = false;
 
 //On calcule de façon aléatoire la coordonnée x de la pièce (entre 0 et 300, multiple de 30)
@@ -18,26 +33,29 @@ let piece = {
     x: coordX,
     y: 0,
     taille: CASE,
-    forme: [
-        [0,1,1],
-        [0,1,1],
-        [0,0,0]
-    ]
+    forme: CARRE
 };
-
 
 //On ajoute un évènement sur les touches du clavier
 document.addEventListener("keydown", function(event) {
+    //Avant les pièces de plusieurs cases
+    //largeurpiece = piece.taille; //CASE
+    nblignespiece = piece.forme.length;
+    nbcolonnespiece = piece.forme[0].length;
+    nbcolonnespiecepixels = nbcolonnespiece * CASE;
+
     if (event.key === "ArrowLeft") {
-        //piece.x = piece.x - CASE;
+        //piece.x = piece.x - CASE > 0 ? piece.x - CASE : 0;
         piece.x = piece.x - CASE > 0 ? piece.x - CASE : 0;
 
         draw(piece);
     }
 
     if (event.key === "ArrowRight") {
-        //piece.x = piece.x + CASE;
-        piece.x = piece.x + CASE > LARGEUR - CASE ? LARGEUR - CASE : piece.x + CASE;
+        //piece.x = piece.x + CASE > LARGEUR - CASE ? LARGEUR - CASE : piece.x + CASE;
+
+        //il y a une erreur car la largeur du carré en fait c'est pas 3 mais 2 !!!!
+        piece.x = piece.x + CASE < LARGEUR - nbcolonnespiecepixels ? piece.x + CASE : LARGEUR - nbcolonnespiecepixels;
 
         draw(piece);
     }
@@ -80,8 +98,14 @@ function drawPiece(piece) {
     context.fillStyle = "rgb(200, 0, 0)";
 
     //TODO On récupère la forme de la pièce, et on va afficher la bonne forme
-    //On crée un carré
-    context.fillRect(piece.x, piece.y, piece.taille, piece.taille);
+    //context.fillRect(piece.x, piece.y, piece.taille, piece.taille);
+    for (let i = 0; i < piece.forme.length ; i++){
+        for (let j = 0; j < piece.forme[i].length ; j++){
+            if (piece.forme[i][j] == 1){
+                context.fillRect(piece.x + (j*CASE), piece.y + (i*CASE), CASE, CASE);
+            }            
+        }
+    }
 
     context.lineWidth = 3;
     context.strokeStyle = "grey";
