@@ -6,19 +6,43 @@ const CASE = 30;
 //Hauteur et largeur de la zone de jeu
 const LARGEUR = 300;
 const HAUTEUR = 600;
-const TIME = 120;
+const TIME = 400;
 
 let gameOver = false;
 
-//TODO On calcule de façon aléatoire les coordonnées x et y de la pièce
+//On calcule de façon aléatoire la coordonnée x de la pièce (entre 0 et 300, multiple de 30)
+//On cherche un nombre aléatoire entre 0 et 10 puis on le multiplie par 30 (merci chatgpt)
+let coordX = Math.floor(Math.random() * 10 ) * 30;
 //On crée un objet pièce avec coordonnées x et y, et une taille
 let piece = {
-    x: 120,
+    x: coordX,
     y: 0,
-    taille: CASE
+    taille: CASE,
+    forme: [
+        [0,1,1],
+        [0,1,1],
+        [0,0,0]
+    ]
 };
 
-//draw(piece);
+
+//On ajoute un évènement sur les touches du clavier
+document.addEventListener("keydown", function(event) {
+    if (event.key === "ArrowLeft") {
+        //piece.x = piece.x - CASE;
+        piece.x = piece.x - CASE > 0 ? piece.x - CASE : 0;
+
+        draw(piece);
+    }
+
+    if (event.key === "ArrowRight") {
+        //piece.x = piece.x + CASE;
+        piece.x = piece.x + CASE > LARGEUR - CASE ? LARGEUR - CASE : piece.x + CASE;
+
+        draw(piece);
+    }
+    
+});
 
 //Toutes les TIME ms, on appelle la fonction chute
 setInterval(function () {
@@ -30,8 +54,6 @@ setInterval(function () {
     }
 
 }, TIME);
-
-
 
 //Fonction qui dessine la grille du tetris
 function showGrid(){
@@ -57,6 +79,7 @@ function drawPiece(piece) {
     //Couleur qui sera utilisée pour la pièce 
     context.fillStyle = "rgb(200, 0, 0)";
 
+    //TODO On récupère la forme de la pièce, et on va afficher la bonne forme
     //On crée un carré
     context.fillRect(piece.x, piece.y, piece.taille, piece.taille);
 
