@@ -6,23 +6,23 @@ const CASE = 30;
 //Hauteur et largeur de la zone de jeu
 const LARGEUR = 300;
 const HAUTEUR = 600;
+//Nombre de lignes et de colonnes
+const NBLIGNES = HAUTEUR / CASE;
+const NBCOLONNES = LARGEUR / CASE;
 const TIME = 400;
-
+//On définit les différentes formes possibles
 const FORME1 =  [
         [1,1,0],
         [1,1,0]
     ];
-
 const FORME2 = [
     [1,0,0],
     [1,1,1]
 ];
-
 const FORME3 = [
     [1,1,1],
     [0,0,0]
 ];
-
 const FORME4 = [
     [1,1,1],
     [0,1,0]
@@ -31,34 +31,16 @@ const formes = [FORME1, FORME2, FORME3, FORME4];
 
 let gameOver = false;
 
-//On calcule de façon aléatoire la forme de la pièce parmi les formes disponibles dans le tableau
-let indiceAleatoire = Math.floor(Math.random() * formes.length);
-let formechoisie = formes[indiceAleatoire];
+let magrille = initGrille();
 
-//On crée un objet pièce avec coordonnées x et y, et une taille
-//TODO Etape suivante : génération aléatoire des formes !
-let piece = {
-    x: 0,
-    y: 0,
-    taille: CASE,
-    forme: formechoisie
-};
-
-//On calcule de façon aléatoire la coordonnée x de la pièce (entre 0 et 300, multiple de 30)
-//On cherche un nombre aléatoire entre 0 et 10 puis on le multiplie par la taille de la case (merci chatgpt)
-//let coordX = Math.floor(Math.random() * 10 ) * CASE;
-let largeurPiece = getNbColonnesForme(piece.forme) * CASE;
-let nbPositionsPossibles = (LARGEUR - largeurPiece) / CASE + 1;
-let coordX = Math.floor(Math.random() * nbPositionsPossibles) * CASE;
-piece.x = coordX;
-
+//On crée une nouvelle pièce
+let piece = nouvellePiece(formes);
 
 //On ajoute un évènement sur les touches du clavier
 document.addEventListener("keydown", function(event) {
-    //Avant les pièces de plusieurs cases
-    //largeurpiece = piece.taille; //CASE
-    nblignespiece = getNbLignesForme;
-    nblignespiecepixels = nblignespiece * CASE;
+    //Calcul du nombre de lignes par pièce, et nombre de pixels par pièce, mais pour l'instant non utilisé
+    //nblignespiece = getNbLignesForme(piece.forme);
+    //nblignespiecepixels = nblignespiece * CASE;
     
     nbcolonnespiece = getNbColonnesForme(piece.forme);
     nbcolonnespiecepixels = nbcolonnespiece * CASE;
@@ -79,20 +61,42 @@ document.addEventListener("keydown", function(event) {
     
 });
 
-
-//Toutes les TIME ms, on appelle la fonction chute
+//Toutes les TIME ms
 setInterval(function () {
-
     //Si la partie n'est pas finie
     if (!gameOver) {
-        hauteurpiece = getNbLignesForme(piece.forme);
+        let hauteurpiecepixels = getNbLignesForme(piece.forme) * CASE;
         //piece.y = piece.y < HAUTEUR - CASE ? piece.y + CASE : HAUTEUR - CASE;
-        piece.y = piece.y < HAUTEUR - hauteurpiece ? piece.y + CASE : HAUTEUR - hauteurpiece;
+        piece.y = piece.y < HAUTEUR - hauteurpiecepixels ? piece.y + CASE : HAUTEUR - hauteurpiecepixels;
 
         draw(piece);
     }
 
 }, TIME);
+
+//Fonction qui envoie une nouvelle pièce
+function nouvellePiece(formes){
+    //On calcule de façon aléatoire la forme de la pièce parmi les formes disponibles dans le tableau
+    let indiceAleatoire = Math.floor(Math.random() * formes.length);
+    let formechoisie = formes[indiceAleatoire];
+
+    //On crée un objet pièce avec coordonnées x et y, et une taille
+    let piece = {
+        x: 0,
+        y: 0,
+        taille: CASE,
+        forme: formechoisie
+    };
+
+    //On calcule de façon aléatoire la coordonnée x de la pièce (entre 0 et 300, multiple de 30)
+    //On cherche un nombre aléatoire entre 0 et 10 puis on le multiplie par la taille de la case (merci chatgpt)
+    //let coordX = Math.floor(Math.random() * 10 ) * CASE;
+    let largeurPiece = getNbColonnesForme(piece.forme) * CASE;
+    let nbPositionsPossibles = (LARGEUR - largeurPiece) / CASE + 1;
+    let coordX = Math.floor(Math.random() * nbPositionsPossibles) * CASE;
+    piece.x = coordX;
+    return piece;
+}
 
 //Fonction qui calcule le nombre de colonnes réel que prend une forme
 function getNbColonnesForme(forme){
@@ -120,8 +124,25 @@ function getNbLignesForme(forme){
     return idmaxavecun+1;
 }
 
+//Fonction qui initialise la matrice qui va représenter la grille
+function initGrille(){
+    //On va créer la matrice qui représente la grille, pour l'instant remplie de 0    
+    let grille = [];
+    //On parcoure les lignes 
+    for (let i=0; i<NBLIGNES; i++) {
+        // On crée une nouvelle ligne
+        grille[i] = [];
+        //On parcoure les colonnes 
+        for (let j=0; j<NBCOLONNES; j++) {
+            //On met un 0 dans la case du tableau à deux dimensions 
+            grille[i][j] = 0;
+        }
+    }
+    return grille;
+}
+
 //Fonction qui dessine la grille du tetris
-function showGrid(){
+function afficheGrille(){
     //On va afficher une grille de 10 colonnes et 20 lignes
     let x = 0;
     let y = 0;
@@ -139,12 +160,36 @@ function showGrid(){
     }
 }
 
+//Fonction qui dessine la grille du tetris remplie
+function afficheGrilleRemplie(){
+    for (let i = 0; i < NBLIGNES; i++) {
+        for (let j = 0; j < NBCOLONNES; j++) {
+
+            // Si la case est occupée
+            if (magrille[i][j] == 1) {
+
+                context.fillStyle = "rgb(200, 0, 0)";
+
+                //J'essaie d'afficher la case
+                //context.strokeRect(j * CASE, i * CASE, CASE, CASE);    
+
+                context.fillRect(
+                    j * CASE,  // coordonnée x : colonne
+                    i * CASE,  // coordonnée y : ligne
+                    CASE,
+                    CASE
+                );
+            }
+        }
+    }
+}
+
 //Fonction qui dessine une pièce
 function drawPiece(piece) {    
     //Couleur qui sera utilisée pour la pièce 
     context.fillStyle = "rgb(200, 0, 0)";
 
-    //TODO On récupère la forme de la pièce, et on va afficher la bonne forme
+    //On récupère la forme de la pièce, et on va afficher la bonne forme
     //context.fillRect(piece.x, piece.y, piece.taille, piece.taille);
     for (let i = 0; i < piece.forme.length ; i++){
         for (let j = 0; j < piece.forme[i].length ; j++){
@@ -166,7 +211,8 @@ function draw(piece){
     context.clearRect(0, 0, LARGEUR, HAUTEUR);
 
     //On réaffiche la grille
-    showGrid();
+    //afficheGrille();
+    afficheGrilleRemplie(magrille);
 
     //On affiche la pièce 
     drawPiece(piece)
