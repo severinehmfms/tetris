@@ -8,33 +8,50 @@ const LARGEUR = 300;
 const HAUTEUR = 600;
 const TIME = 400;
 
-const CARRE =  [
+const FORME1 =  [
         [1,1,0],
         [1,1,0]
     ];
 
-const L = [
+const FORME2 = [
     [1,0,0],
     [1,1,1]
 ];
 
-const TRAIT = [
+const FORME3 = [
     [1,1,1],
     [0,0,0]
 ];
 
+const FORME4 = [
+    [1,1,1],
+    [0,1,0]
+];
+const formes = [FORME1, FORME2, FORME3, FORME4];
+
 let gameOver = false;
 
-//On calcule de façon aléatoire la coordonnée x de la pièce (entre 0 et 300, multiple de 30)
-//On cherche un nombre aléatoire entre 0 et 10 puis on le multiplie par 30 (merci chatgpt)
-let coordX = Math.floor(Math.random() * 10 ) * 30;
+//On calcule de façon aléatoire la forme de la pièce parmi les formes disponibles dans le tableau
+let indiceAleatoire = Math.floor(Math.random() * formes.length);
+let formechoisie = formes[indiceAleatoire];
+
 //On crée un objet pièce avec coordonnées x et y, et une taille
+//TODO Etape suivante : génération aléatoire des formes !
 let piece = {
-    x: coordX,
+    x: 0,
     y: 0,
     taille: CASE,
-    forme: CARRE
+    forme: formechoisie
 };
+
+//On calcule de façon aléatoire la coordonnée x de la pièce (entre 0 et 300, multiple de 30)
+//On cherche un nombre aléatoire entre 0 et 10 puis on le multiplie par la taille de la case (merci chatgpt)
+//let coordX = Math.floor(Math.random() * 10 ) * CASE;
+let largeurPiece = getNbColonnesForme(piece.forme) * CASE;
+let nbPositionsPossibles = (LARGEUR - largeurPiece) / CASE + 1;
+let coordX = Math.floor(Math.random() * nbPositionsPossibles) * CASE;
+piece.x = coordX;
+
 
 //On ajoute un évènement sur les touches du clavier
 document.addEventListener("keydown", function(event) {
