@@ -47,10 +47,13 @@ document.addEventListener("keydown", function(event) {
     nbcolonnespiecepixels = nbcolonnespiece * CASE;
 
     if (event.key === "ArrowLeft") {
-        //piece.x = piece.x - CASE > 0 ? piece.x - CASE : 0;
-        piece.x = piece.x - CASE > 0 ? piece.x - CASE : 0;
+        if (event.key === "ArrowLeft") {
+            if (piece.x > 0) {
+                piece.x -= CASE;
+            }
 
-        draw(piece);
+            draw(piece);
+        }
     }
 
     if (event.key === "ArrowRight") {
@@ -72,6 +75,25 @@ document.addEventListener("keydown", function(event) {
 
         draw(piece);
     }
+
+    //Touche du bas on descend plus vite
+    if (event.key === "ArrowDown") {
+        if (peutDescendre(piece)) {
+            piece.y += CASE;
+        } else {
+            fixerPiece(piece);
+            supprimerLignesCompletes();
+
+            piece = nouvellePiece(formes);
+
+            if (!peutPlacerPiece(piece)) {
+                gameOver = true;
+                alert("Game Over !");
+            }
+        }
+
+        draw(piece);
+    }
     
 });
 
@@ -79,21 +101,15 @@ document.addEventListener("keydown", function(event) {
 function peutPlacerPiece(piece) {
     for (let i = 0; i < piece.forme.length; i++) {
         for (let j = 0; j < piece.forme[i].length; j++) {
-
             if (piece.forme[i][j] === 1) {
                 let ligne = piece.y / CASE + i;
                 let colonne = piece.x / CASE + j;
 
-                // La pièce dépasse de la grille
                 if (
                     ligne < 0 || ligne >= NBLIGNES ||
-                    colonne < 0 || colonne >= NBCOLONNES
+                    colonne < 0 || colonne >= NBCOLONNES ||
+                    magrille[ligne][colonne] === 1
                 ) {
-                    return false;
-                }
-
-                // La case est déjà occupée
-                if (magrille[ligne][colonne] === 1) {
                     return false;
                 }
             }
@@ -189,12 +205,14 @@ function peutDescendre(piece) {
 
 //Fonction pour la rotation des pièces (merci chatgpt)
 //Nouvelle fonction tourner pièce qui vérifie si ça va provoquer une collision
+
 function tournerPiece(piece) {
     let ancienneForme = piece.forme;
     let nbLignes = ancienneForme.length;
     let nbColonnes = ancienneForme[0].length;
     let nouvelleForme = [];
 
+    // Rotation de 90° vers la droite
     for (let j = 0; j < nbColonnes; j++) {
         nouvelleForme[j] = [];
 
@@ -203,17 +221,33 @@ function tournerPiece(piece) {
         }
     }
 
-    // On garde temporairement l'ancienne forme
+    // Supprimer les lignes entièrement vides
+    nouvelleForme = nouvelleForme.filter(
+        ligne => ligne.some(valeur => valeur === 1)
+    );
+
+    // Supprimer les colonnes entièrement vides
+    let colonnesNonVides = [];
+
+    for (let j = 0; j < nouvelleForme[0].length; j++) {
+        if (nouvelleForme.some(ligne => ligne[j] === 1)) {
+            colonnesNonVides.push(j);
+        }
+    }
+
+    nouvelleForme = nouvelleForme.map(ligne =>
+        colonnesNonVides.map(j => ligne[j])
+    );
+
+    // Tester la nouvelle forme
     piece.forme = nouvelleForme;
 
-    // On corrige la position si la pièce dépasse à droite
     let largeur = getNbColonnesForme(piece.forme) * CASE;
 
     if (piece.x + largeur > LARGEUR) {
         piece.x = LARGEUR - largeur;
     }
 
-    // Si la rotation provoque une collision, on l'annule
     if (!peutPlacerPiece(piece)) {
         piece.forme = ancienneForme;
     }
