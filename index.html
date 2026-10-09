@@ -4,23 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Tetris</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-    <h1> TETRIS</h1>
+    <div class="conteneur-jeu">
 
-    <p>
-        Score : <span id="score">0</span>
-    </p>
+        <aside class="panneau">
+            <h1>🎮 TETRIS</h1>
 
-    <canvas id="jeu" width="300" height="600"></canvas>
+            <div class="score-box">
+                <p> SCORE </p>
+                <span id="score">0</span>
+            </div>
 
-    <br>
+            <p class="aide">← → Déplacer</p>
+            <p class="aide">↑ Tourner</p>
+            <p class="aide">↓ Accélérer</p>
+        </aside>
 
-    <button id="restart">Recommencer</button>
+        <canvas id="jeu" width="300" height="600"></canvas>
+
+    </div>
 
     <script src="js/script.js"></script>
 

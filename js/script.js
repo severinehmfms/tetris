@@ -27,7 +27,21 @@ const FORME4 = [
     [1,1,1],
     [0,1,0]
 ];
-const formes = [FORME1, FORME2, FORME3, FORME4];
+const FORME5 = [
+    [0,0,1],
+    [1,1,1]
+];
+
+//TODO Voir comment FIXER les couleurs une fois les pièces en bas
+const couleurs = {
+    1: "#3498DB", // Bleu
+    2: "#F1C40F", // Jaune
+    3: "#2ECC71", // Vert
+    4: "#9B59B6",  // Violet
+    5: "#8B1520" //bordeaux
+};
+
+const formes = [FORME1, FORME2, FORME3, FORME4, FORME5];
 
 let gameOver = false;
 let score = 0;
@@ -45,6 +59,11 @@ document.addEventListener("keydown", function(event) {
     
     nbcolonnespiece = getNbColonnesForme(piece.forme);
     nbcolonnespiecepixels = nbcolonnespiece * CASE;
+
+    //On empêche le fonctionnement par défaut des touches
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+        event.preventDefault();
+    }
 
     if (event.key === "ArrowLeft") {
         if (event.key === "ArrowLeft") {
@@ -101,14 +120,14 @@ document.addEventListener("keydown", function(event) {
 function peutPlacerPiece(piece) {
     for (let i = 0; i < piece.forme.length; i++) {
         for (let j = 0; j < piece.forme[i].length; j++) {
-            if (piece.forme[i][j] === 1) {
+            if (piece.forme[i][j] !== 0 ) {
                 let ligne = piece.y / CASE + i;
                 let colonne = piece.x / CASE + j;
 
                 if (
                     ligne < 0 || ligne >= NBLIGNES ||
                     colonne < 0 || colonne >= NBCOLONNES ||
-                    magrille[ligne][colonne] === 1
+                    magrille[ligne][colonne] !== 0
                 ) {
                     return false;
                 }
@@ -129,27 +148,19 @@ setInterval(function () {
             //piece.y = piece.y < HAUTEUR - hauteurpiecepixels ? piece.y + CASE : HAUTEUR - hauteurpiecepixels;
             piece.y += CASE;
         }else {
+            //Si la pièce ne peut plus descendre, on enregistre sa position dans la matrice
             fixerPiece(piece);
+            //On supprime les lignes complètes
             supprimerLignesCompletes();
-
+            //On crée une nouvelle pièce
             piece = nouvellePiece(formes);
 
-            // Vérifier si la nouvelle pièce peut apparaître
+            // Si la nouvelle pièce ne peut pas se placer, la partie est terminée
             if (!peutPlacerPiece(piece)) {
                 gameOver = true;
                 alert("Game Over !");
             }
         }
-        
-        /*}else{
-            //Si la pièce ne peut plus descendre, on enregistre sa position dans la matrice, puis on crée une nouvelle pièce
-            fixerPiece(piece);
-            // On supprime les lignes complètes
-            supprimerLignesCompletes();
-            
-            //On crée une nouvelle pièce
-            piece = nouvellePiece(formes);
-        }*/
         draw(piece);
     }
 
@@ -177,7 +188,8 @@ function peutDescendre(piece) {
         for (let j = 0; j < piece.forme[i].length; j++) {
 
             // On ne s'intéresse qu'aux cases occupées par la pièce
-            if (piece.forme[i][j] === 1) {
+            
+            if (piece.forme[i][j] !== 0) {
 
                 // Position de cette case dans la grille
                 let ligne = piece.y / CASE + i;
@@ -192,7 +204,7 @@ function peutDescendre(piece) {
                 }
 
                 // Si la case située en dessous est déjà occupée
-                if (magrille[ligneDessous][colonne] === 1) {
+                if (magrille[ligneDessous][colonne] !== 0) {
                     return false;
                 }
             }
@@ -205,7 +217,6 @@ function peutDescendre(piece) {
 
 //Fonction pour la rotation des pièces (merci chatgpt)
 //Nouvelle fonction tourner pièce qui vérifie si ça va provoquer une collision
-
 function tournerPiece(piece) {
     let ancienneForme = piece.forme;
     let nbLignes = ancienneForme.length;
@@ -253,6 +264,7 @@ function tournerPiece(piece) {
     }
 }
 /*
+//Fonction qui fait tourner une pièce
 function tournerPiece(piece) {
     let ancienneForme = piece.forme;
     let nbLignes = ancienneForme.length;
@@ -284,7 +296,9 @@ function fixerPiece(piece) {
                 let ligne = piece.y / CASE + i;
                 let colonne = piece.x / CASE + j;
 
-                magrille[ligne][colonne] = 1;
+                //magrille[ligne][colonne] = 1;
+                //Au lieu de stocker 1 pour occupée, on stoke l'id de la couleur
+                magrille[ligne][colonne] = piece.couleurId;
             }
         }
     }
@@ -297,7 +311,7 @@ function supprimerLignesCompletes() {
     for (let i = NBLIGNES - 1; i >= 0; i--) {
         // On vérifie si toute la ligne est remplie
         let ligneComplete = magrille[i].every(
-            caseGrille => caseGrille === 1
+            caseGrille => caseGrille !== 0
         );
 
         if (ligneComplete) {
@@ -332,7 +346,9 @@ function nouvellePiece(formes){
         x: 0,
         y: 0,
         taille: CASE,
-        forme: formechoisie
+        forme: formechoisie,
+        couleurId: indiceAleatoire + 1,
+        couleur: couleurs[indiceAleatoire + 1]
     };
 
     //On calcule de façon aléatoire la coordonnée x de la pièce (entre 0 et 300, multiple de 30)
@@ -408,21 +424,17 @@ function afficheGrille(){
 }
 
 //Fonction qui dessine la grille du tetris remplie
-function afficheGrilleRemplie(){
+function afficheGrilleRemplie() {
     for (let i = 0; i < NBLIGNES; i++) {
         for (let j = 0; j < NBCOLONNES; j++) {
 
-            // Si la case est occupée
-            if (magrille[i][j] == 1) {
-
-                context.fillStyle = "rgb(200, 0, 0)";
-
-                //J'essaie d'afficher la case
-                //context.strokeRect(j * CASE, i * CASE, CASE, CASE);    
+            // Une case est occupée si sa valeur n'est pas 0
+            if (magrille[i][j] !== 0) {
+                context.fillStyle = couleurs[magrille[i][j]];
 
                 context.fillRect(
-                    j * CASE,  // coordonnée x : colonne
-                    i * CASE,  // coordonnée y : ligne
+                    j * CASE,
+                    i * CASE,
                     CASE,
                     CASE
                 );
@@ -431,10 +443,12 @@ function afficheGrilleRemplie(){
     }
 }
 
+
 //Fonction qui dessine une pièce
 function drawPiece(piece) {    
     //Couleur qui sera utilisée pour la pièce 
-    context.fillStyle = "rgb(200, 0, 0)";
+    //context.fillStyle = "rgb(200, 0, 0)";
+    context.fillStyle = piece.couleur;
 
     //On récupère la forme de la pièce, et on va afficher la bonne forme
     //context.fillRect(piece.x, piece.y, piece.taille, piece.taille);
